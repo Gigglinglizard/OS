@@ -5,17 +5,18 @@
 
 int main() {
 
+    //create pipe
     int fd[2];
-    pipe(fd); //create pipe
+    pipe(fd); 
 
+    //create child
     pid_t fork(void);
-    pid_t pid = fork(); //create child
+    pid_t pid = fork(); 
 
-   
-
+    //catch errors in fork
     if (pid == -1) {
-    perror("fork");
-    exit(1);
+        perror("fork");
+        exit(1);
     }   
 
     // child process
