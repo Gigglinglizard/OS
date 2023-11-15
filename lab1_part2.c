@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <mqueue.h>
 #include <string.h>
+#include <sys/wait.h>
 
 #define MQ_MODE 0666
 
@@ -38,6 +39,7 @@ int main() {
 
     // parent process
     else {
+        wait(NULL);
         int MAX_SIZE = 100;
         int MAX_NUM_MSG = 10;
         char *my_mq = "/mymq";
