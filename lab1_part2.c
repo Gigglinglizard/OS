@@ -9,12 +9,6 @@
 
 #define MQ_MODE 0666
 
-struct mq_attr {
-long mq_flags; // Message queue description flags
-long mq_maxmsg; // Maximum number of messages on queue
-long mq_msgsize; // Maximum message size (in bytes)
-long mq_curmsgs; // Number of messages currently in queue
-};
 
 int main() {
     // create message queue
