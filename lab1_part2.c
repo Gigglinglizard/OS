@@ -10,54 +10,60 @@
 
 #define MQ_MODE 0666
 
-
 int main() {
-    // create message queue
-    mqd_t mqd = mq_open("/mymq", O_RDONLY | O_CREAT, MQ_MODE, NULL);
+    mqd_t mqd; 
 
-    // create child
+    mqd = mq_open("/mymq", O_RDONLY | O_CREAT, MQ_MODE, NULL);
+   
     pid_t pid = fork();
 
-    // catch errors in fork
+    //error in child process
     if (pid == -1) {
         perror("fork");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
-    // child process
+    //child process, sends the message
     if (pid == 0) {
-        char *my_mq = "/mymq";
-        char *write_msg = "hello";
-        mqd_t mqd_child;
-        // Open an existing message queue
-        mqd_child = mq_open(my_mq, O_WRONLY);
-        // Write "hello" to the message queue
-        mq_send(mqd_child, write_msg, strlen(write_msg), 0);
-        // Close the message queue
-        mq_close(mqd_child);
-    }
+        char *file_path = "./test.txt"; 
 
-    // parent process
-    else {
-        wait(NULL);
-        int MAX_SIZE = 100;
-        int MAX_NUM_MSG = 10;
-        char *my_mq = "/mymq";
+        int file_fd = open(file_path, O_RDONLY);
+
+        int MAX_SIZE = 100000;
         char buf[MAX_SIZE];
-        mqd_t mqd_parent;
-        struct mq_attr attr;
-        // Form the queue attributes
-        attr.mq_maxmsg = MAX_NUM_MSG;
-        attr.mq_msgsize = MAX_SIZE;
-        // Create message queue
-        mqd_parent = mq_open(my_mq, O_RDONLY | O_CREAT, MQ_MODE, &attr);
-        // Read the message from the message queue
-        mq_receive(mqd_parent, buf, MAX_SIZE, NULL);
+        ssize_t bytes_read = read(file_fd, buf, MAX_SIZE);
+        
+        char *my_mq = "/mymq";
+        mqd_t mqd_child;
+
+        mqd_child = mq_open(my_mq, O_WRONLY);
+
+        mq_send(mqd_child, buf, bytes_read, 0);
+        
+        mq_close(mqd_child);
+
+    // parent process, receives the message and counts
+    } else {
+        int MAX_SIZE = 100000;
+        char buf[MAX_SIZE];
+        
+        ssize_t bytes_received = mq_receive(mqd, buf, MAX_SIZE, NULL);
+
+        int count = 1;
+        int i = 0;
+        while(buf[i] != 0){
+            if(buf[i] == ' '){
+                count++;
+            }
+            i++;
+        }
+
+        printf("Amount of words: %d\n", count);
         printf("Message: %s\n", buf);
-        // Close the message queue
-        mq_close(mqd_parent);
-        // Remove the message queue
-        mq_unlink("/mymq");
+
+        mq_close(mqd);
+
+        //mq_unlink("/mymq");
     }
 
     return 0;
