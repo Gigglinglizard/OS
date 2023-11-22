@@ -20,15 +20,16 @@ void* thread_func(void *arg) {
 
         done = buffer >= 15;
         if(!done){
-            printf("TID: %ld, PID: %d, Buffer: %d\n", pthread_self(), getpid(), buffer);
-            
-            thread_counters[thread_index]++;
-            buffer++;
+            if(buffer%NUM_THREADS == thread_index && buffer < 15){
+                printf("TID: %ld, PID: %d, Buffer: %d\n", pthread_self(), getpid(), buffer);
+                
+                thread_counters[thread_index]++;
+                buffer++;
+                sleep(1);
+            }
         }
         pthread_mutex_unlock(&lock); 
     }
-    sleep(2);
-    
     return NULL;
 }
 
@@ -37,14 +38,20 @@ int main(void) {
     int thread_indices[NUM_THREADS] = {0, 1, 2};
 
     pthread_mutex_init(&lock, NULL);
+    
+for(int i = 0; i < 15; i++){
+    for (int i = 0; i < NUM_THREADS; ++i) {
+        pthread_create(&threads[i], NULL, &thread_func, &thread_indices[i]);
+    }
 
-    pthread_create(&threads[0], NULL, &thread_func, &thread_indices[0]);
-    pthread_create(&threads[1], NULL, &thread_func, &thread_indices[1]);
-    pthread_create(&threads[2], NULL, &thread_func, &thread_indices[2]);
+    for (int i = 0; i < NUM_THREADS; ++i) {
+        pthread_join(threads[i], NULL);
+    }
 
-    pthread_join(threads[0], NULL);
-    pthread_join(threads[1], NULL);
-    pthread_join(threads[2], NULL);
+    if(buffer >= 15){
+        break;
+    }
+}
 
     for (int i = 0; i < NUM_THREADS; ++i) {
         printf("TID %ld worked on the buffer %d times\n", threads[i], thread_counters[i]);
