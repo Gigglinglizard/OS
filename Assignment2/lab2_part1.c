@@ -27,7 +27,7 @@ void* thread_func(void *arg) {
         }
         pthread_mutex_unlock(&lock); 
     }
-    sleep(1);
+    sleep(2);
     
     return NULL;
 }
