@@ -6,7 +6,7 @@
 
 #define NUM_THREADS 3
 
-int counter = 0;
+int buffer = 0;
 int thread_counters[NUM_THREADS] = {0};
 
 pthread_mutex_t lock;
@@ -18,12 +18,12 @@ void* thread_func(void *arg) {
     while(!done){
         pthread_mutex_lock(&lock);
 
-        done = counter >= 15;
+        done = buffer >= 15;
         if(!done){
-            printf("TID: %ld, PID: %d, Buffer: %d\n", pthread_self(), getpid(), counter);
+            printf("TID: %ld, PID: %d, Buffer: %d\n", pthread_self(), getpid(), buffer);
             
             thread_counters[thread_index]++;
-            counter++;
+            buffer++;
         }
         pthread_mutex_unlock(&lock); 
     }
@@ -50,7 +50,7 @@ int main(void) {
         printf("TID %ld worked on the buffer %d times\n", threads[i], thread_counters[i]);
     }
 
-    printf("Total buffer accesses: %d\n", counter);
+    printf("Total buffer accesses: %d\n", buffer);
 
     pthread_mutex_destroy(&lock);
     return 0;
