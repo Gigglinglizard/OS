@@ -16,11 +16,8 @@ void* thread_func(void *arg) {
     int thread_index = *(int*)arg;
     int done = 0;
 
-    //while(!done){
         pthread_mutex_lock(&lock);
 
-        //done = buffer >= 15;
-        //if(!done){
             if(buffer%NUM_THREADS == thread_index && buffer < MAX_ITERATIONS){
                 printf("TID: %ld, PID: %d, Buffer: %d\n", pthread_self(), getpid(), buffer);
                 
@@ -28,9 +25,7 @@ void* thread_func(void *arg) {
                 buffer++;
                 sleep(1);
             }
-        //}
         pthread_mutex_unlock(&lock); 
-    //}
     return NULL;
 }
 
@@ -44,11 +39,11 @@ int main(void) {
         for (int i = 0; i < NUM_THREADS; ++i) {
             pthread_create(&threads[i], NULL, &thread_func, &thread_indices[i]);
         }
-
+        
         for (int i = 0; i < NUM_THREADS; ++i) {
             pthread_join(threads[i], NULL);
         }
-
+        
         if(buffer >= MAX_ITERATIONS){
             break;
         }
