@@ -59,6 +59,7 @@
   "cmake.configureOnOpen": false,
   "files.associations": {
     "wait.h": "c",
-    "stdlib.h": "c"
+    "stdlib.h": "c",
+    "unistd.h": "c"
   }
 }

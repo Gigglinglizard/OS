@@ -1,117 +1,114 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <pthread.h>
-#include <semaphore.h>
-#include <sys/mman.h>
-#include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/mman.h>
+#include <semaphore.h>
+#include <fcntl.h>
 
-#define MAX 2
+#define MAX 5
 
-// Shared data structure
-typedef struct {
-    int var;
+struct SharedMemory {
+    int data;
     sem_t mutex;
     sem_t writeMutex;
-    int readerCount;
-} SharedData;
-
-SharedData *sharedData;
-
-void initializeSharedData() {
-    sharedData = mmap(NULL, sizeof(SharedData), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
-    if (sharedData == MAP_FAILED) {
-        perror("Error in mmap");
-        exit(EXIT_FAILURE);
-    }
-
-    sharedData->var = 0;
-    sem_init(&sharedData->mutex, 1, 1);         // Initialize mutex to 1 (unlocked)
-    sem_init(&sharedData->writeMutex, 1, 1);   // Initialize writeMutex to 1 (unlocked)
-    sharedData->readerCount = 0;
-}
-
-void cleanupSharedData() {
-    sem_destroy(&sharedData->mutex);
-    sem_destroy(&sharedData->writeMutex);
-    munmap(sharedData, sizeof(SharedData));
-}
-
-void* writer(void* arg) {
-    while (1) {
-        sem_wait(&sharedData->writeMutex);
-
-        // Write to the shared buffer
-        sharedData->var++;
-       
-
-        if (sharedData->var == MAX) {
-            break;
-        }
-        printf("The writer (PID %d) writes the value %d\n", getpid(), sharedData->var);
-
-        // Release the lock
-        sem_post(&sharedData->writeMutex);
-        // Introduce delay to make messages visible
-        sleep(1);
-    }
-
-    return NULL;
-}
-
-void* reader(void* arg) {
-    sem_wait(&sharedData->mutex);
-    sharedData->readerCount++;
-    if (sharedData->readerCount == 1) {
-        sem_wait(&sharedData->writeMutex);
-        printf("The first reader acquires the lock.\n");
-    }
-    sem_post(&sharedData->mutex);
-
-    // Read from the shared buffer
-    printf("Reader (PID %d) reads the value %d\n", getpid(), sharedData->var);
-
-    sem_wait(&sharedData->mutex);
-    sharedData->readerCount--;
-    if (sharedData->readerCount == 0) {
-        sem_post(&sharedData->writeMutex);
-        printf("The last reader releases the lock.\n");
-    }
-    sem_post(&sharedData->mutex);
-
-    return NULL;
-}
+    int readCount;
+};
 
 int main() {
-    initializeSharedData();
+    // Initialize shared memory
+    struct SharedMemory *shared = mmap(NULL, sizeof(struct SharedMemory), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    shared->data = 0;
+    shared->reader_count = 0;
+    sem_init(&shared->mutex, 1, 1);
+    sem_init(&shared->writeMutex, 1, 1);
 
-    pid_t reader1PID, reader2PID, writerPID;
 
-    // Create the writer process
-    if ((writerPID = fork()) == 0) {
-        writer(NULL);
-        exit(EXIT_SUCCESS);
+//write
+    do {
+        sem_wait(&shared->writeMutex);
+    
+        /* writing is performed */
+    
+        sem_post(&shared->writeMutex);
+    } while (1);
+
+//read
+do {
+    sem_wait(&shared->mutex);
+    shared->readCount++;
+    if (readCount == 1){
+    sem_wait(&shared->writeMutex);
     }
+    sem_post(&shared->mutex);
+    /* reading is performed */
 
-    // Create the first reader process
-    if ((reader1PID = fork()) == 0) {
-        reader(NULL);
-        exit(EXIT_SUCCESS);
+
+    sem_wait(&shared->mutex);
+    shared->readCount--;
+    if (&shared->readCount == 0){
+    sem_post(&shared->writeMutex);
     }
+    sem_post(&shared->mutex);
+} while (1);
 
-    // Create the second reader process
-    if ((reader2PID = fork()) == 0) {
-        reader(NULL);
-        exit(EXIT_SUCCESS);
+
+
+
+
+
+
+
+
+
+
+
+    // Create processes for writer and readers
+    for (int i = 0; i < 3; i++) {
+        pid_t pid = fork();
+        if (pid == 0) {  // Child process
+            if (i == 0) {  // Writer process
+                while (shared->data < MAX) {
+                    sem_wait(&shared->writeMutex);
+                    printf("Writer (%d) writes data: %d\n", getpid(), ++shared->data);
+                    sem_post(&shared->writeMutex);
+                    sleep(1);
+                }
+            } else {  // Reader processes
+                while (shared->data < MAX) {
+                    sem_wait(&shared->mutex);
+                    shared->reader_count++;
+                    if (shared->reader_count == 1) {
+                        sem_wait(&shared->writeMutex);
+                        printf("First reader (%d) acquired the lock\n", getpid());
+                    }
+                    sem_post(&shared->mutex);
+
+                    printf("Reader (%d) reads data: %d\n", getpid(), shared->data);
+
+                    sem_wait(&shared->mutex);
+                    shared->reader_count--;
+                    if (shared->reader_count == 0) {
+                        printf("Last reader (%d) released the lock\n", getpid());
+                        sem_post(&shared->wrt);
+                    }
+                    sem_post(&shared->mutex);
+                    sleep(1);
+                }
+            }
+            exit(0);  // Child process exits
+        }
     }
 
     // Wait for all child processes to finish
-    waitpid(reader1PID, NULL, 0);
-    waitpid(reader2PID, NULL, 0);
-    waitpid(writerPID, NULL, 0);
+    for (int i = 0; i < 3; i++) {
+        wait(NULL);
+    }
 
-    cleanupSharedData();
+    // Clean up
+    sem_destroy(&shared->mutex);
+    sem_destroy(&shared->wrt);
+    munmap(shared, sizeof(struct SharedMemory));
 
     return 0;
 }
