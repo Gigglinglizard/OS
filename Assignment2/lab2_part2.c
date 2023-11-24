@@ -27,8 +27,8 @@ void initializeSharedData() {
     }
 
     sharedData->var = 0;
-    sem_init(&sharedData->mutex, 1, 1);  // Initialize mutex to 1 (unlocked)
-    sem_init(&sharedData->writeMutex, 1, 1);  // Initialize writeMutex to 1 (unlocked)
+    sem_init(&sharedData->mutex, 1, 1);         // Initialize mutex to 1 (unlocked)
+    sem_init(&sharedData->writeMutex, 1, 1);   // Initialize writeMutex to 1 (unlocked)
     sharedData->readerCount = 0;
 }
 
@@ -44,15 +44,15 @@ void* writer(void* arg) {
 
         // Write to the shared buffer
         sharedData->var++;
-        printf("The writer (PID %d) writes the value %d\n", getpid(), sharedData->var);
-
-        // Release the lock
-        sem_post(&sharedData->writeMutex);
+       
 
         if (sharedData->var == MAX) {
             break;
         }
+        printf("The writer (PID %d) writes the value %d\n", getpid(), sharedData->var);
 
+        // Release the lock
+        sem_post(&sharedData->writeMutex);
         // Introduce delay to make messages visible
         sleep(1);
     }
@@ -86,7 +86,7 @@ void* reader(void* arg) {
 int main() {
     initializeSharedData();
 
-    pid_t writerPID, reader1PID, reader2PID;
+    pid_t reader1PID, reader2PID, writerPID;
 
     // Create the writer process
     if ((writerPID = fork()) == 0) {
@@ -107,9 +107,9 @@ int main() {
     }
 
     // Wait for all child processes to finish
-    waitpid(writerPID, NULL, 0);
     waitpid(reader1PID, NULL, 0);
     waitpid(reader2PID, NULL, 0);
+    waitpid(writerPID, NULL, 0);
 
     cleanupSharedData();
 
