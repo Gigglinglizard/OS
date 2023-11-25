@@ -28,8 +28,10 @@ void initializeSharedData() {
 
 int writer() {
     sem_wait(&sharedData->writeMutex);
+    printf("The writer acquires the lock\n");
     printf("Writer (%d) writes data: %d\n", getpid(), ++sharedData->data);
     sem_post(&sharedData->writeMutex);
+    printf("The writer releases the lock\n");
     sleep(1);
     return 0;
 }
