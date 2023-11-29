@@ -8,6 +8,7 @@
 #define PHYSICAL_MEMORY_SIZE 65536
 #define BACKING_STORE_SIZE 65536
 
+FILE *backing_store;
 
 typedef struct {
     int frame_number;
@@ -43,6 +44,19 @@ void initializePageTable() {
     }
 }
 
+void openBackingStore() {
+    backing_store = fopen("BACKING_STORE.bin", "rb");
+}
+
+void closeBackingStore() {
+    fclose(backing_store);
+}
+
+void readPageFromBackingStore(int page, char *buffer) {
+    fseek(backing_store, page * PAGE_SIZE, SEEK_SET);
+    fread(buffer, 1, PAGE_SIZE, backing_store);
+}
+
 void extract_page_and_offset(int number, int *page_number, int *page_offset) {
     *page_number = (number >> 8) & 0xFF;  // Right shift by 8 bits to get the page number, then mask to keep only the lower 8 bits
     *page_offset = number & 0xFF;  // Mask to keep only the lower 8 bits for the page offset 
@@ -65,11 +79,12 @@ void calc_phys(int i, int logical_address){
     }
     
     //update page table since tlb failed
-    //if sats lägg till
+    //tog bort denhär för backendstore skiten, kanske ska tillbakakommenteras
+    /*
     if(page_table[page].valid != 1) {
         page_table[page].valid = 1;
         page_table[page].frame_number = i; 
-    }
+    } */
    
     
     // Check if the page table entry is valid
@@ -84,8 +99,24 @@ void calc_phys(int i, int logical_address){
         printf("Virtual Address: %d, pagenumber: %d, Physical address: %d\n", logical_address, page, physical_address);
         return;
     } else {
-        // Page fault: The page is not currently in memory
-        printf("Page fault for virtual address %d\n", i);
+        //printf("Page Fault: Virtual Address: %d, Page Number: %d\n", logical_address, page);
+
+        // Read the page from the BACKING_STORE.bin file and store it in physical memory
+        char buffer[PAGE_SIZE];
+        readPageFromBackingStore(page, buffer);
+
+        // Find an available frame in physical memory
+        int frame = i; // For simplicity, using the same index as the frame number
+
+        // Update page table and TLB
+        page_table[page].valid = 1;
+        page_table[page].frame_number = frame;
+
+        tlb[tlb_index].page_number = page;
+        tlb[tlb_index].frame_number = frame;
+        tlb_index = (tlb_index + 1) % TLB_SIZE;
+
+        printf("Virtual Address: %d, Page Number: %d, Physical Address: %d\n", logical_address, page, frame * PAGE_SIZE + offset);
         return;
     }
 }
@@ -99,6 +130,7 @@ int main(int argc, char *argv[]) {
     PhysicalMemory physicalMemory[256][256]; 
     initializePageTable();
     initializeTLB();
+    openBackingStore();
     
 
     FILE *file = fopen(argv[1], "r");
@@ -109,7 +141,7 @@ int main(int argc, char *argv[]) {
 
     int i = 0;
 
-    while ((fscanf(file, "%d", &logical_address) == 1) && i < 50) {
+    while ((fscanf(file, "%d", &logical_address) == 1)) {
         // Process each logical_address as needed
         // For example, you can print each address:
         calc_phys(i, logical_address);
