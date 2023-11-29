@@ -27,6 +27,7 @@ typedef struct{
 int tlbHit = 0;
 
 PageTableEntry page_table[256]; 
+
 TLBEntry tlb[TLB_SIZE];
 int tlb_index = 0;
 
@@ -50,34 +51,37 @@ void extract_page_and_offset(int number, int *page_number, int *page_offset) {
 void calc_phys(int i, int logical_address){
     int page, offset;
     extract_page_and_offset(logical_address, &page, &offset);
+    
 
     for (int i = 0; i < TLB_SIZE; ++i) {
         if (tlb[i].page_number == page) {
             // TLB hit
             tlbHit++;
             printf("lol\n");
-            int physical_address = (tlb[i].frame_number * PAGE_SIZE) + offset;
-            printf("Virtual Address: %d, frame number: %d, Physical address: %d\n", logical_address, tlb[i].frame_number, physical_address);
+            int phys_address = (tlb[i].frame_number * PAGE_SIZE) + offset;
+            printf("Virtual Address: %d, page Number: %d, Physical address: %d\n", logical_address, page, phys_address);
             return;
         }
     }
     
     //update page table since tlb failed
-    page_table[i].valid = 1;
-    page_table[i].frame_number = i; 
-
+    //if sats lägg till
+    if(page_table[page].valid != 1) {
+        page_table[page].valid = 1;
+        page_table[page].frame_number = i; 
+    }
    
     
     // Check if the page table entry is valid
-    if (page_table[i].valid) {
+    if (page_table[page].valid) {
         // Calculate the physical address using the frame number and offset
-        int physical_address = (page_table[i].frame_number * PAGE_SIZE) + offset;
+        int physical_address = (page_table[page].frame_number * PAGE_SIZE) + offset;
 
         tlb[tlb_index].page_number = page;
         tlb[tlb_index].frame_number = page_table[page].frame_number;
         tlb_index = (tlb_index + 1) % TLB_SIZE; // Implement FIFO replacement strategy
 
-        printf("Virtual Address: %d, frame number: %d, page number: %d, Physical address: %d\n", logical_address, page_table[i].frame_number, page, physical_address);
+        printf("Virtual Address: %d, pagenumber: %d, Physical address: %d\n", logical_address, page, physical_address);
         return;
     } else {
         // Page fault: The page is not currently in memory
@@ -91,18 +95,31 @@ void calc_phys(int i, int logical_address){
 
 
 
-int main() {
+int main(int argc, char *argv[]) {
     PhysicalMemory physicalMemory[256][256]; 
     initializePageTable();
     initializeTLB();
     
 
+    FILE *file = fopen(argv[1], "r");
+    int logical_address;
+
     int numbers[] = {16916, 62493, 30198, 53683, 40185, 28781, 24462, 48399, 64815, 18295, 12218, 22760, 57982, 27966, 54894, 38929};
     int num_elements = sizeof(numbers) / sizeof(numbers[0]);
 
+    int i = 0;
+
+    while ((fscanf(file, "%d", &logical_address) == 1) && i < 50) {
+        // Process each logical_address as needed
+        // For example, you can print each address:
+        calc_phys(i, logical_address);
+        i++;
+    }
+    /*
     for (int i = 0; i < num_elements; i++) {
         calc_phys(i, numbers[i]);
-    }
+    } */
+    printf("amount of tlb hits: %d\n", tlbHit);
 
     return 0;
 }
