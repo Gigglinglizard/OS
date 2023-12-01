@@ -121,7 +121,7 @@ void calc_phys(int i, int logical_address, char *physicalMemory){
         // Page fault handling 
 
         page_fault++;
-        // Read the page from the BACKING_STORE.bin file and store it in physical memory
+        // Read the page from the BACKING_STORE.bin file and store it in buffer
         char buffer[PAGE_SIZE];
         readPageFromBackingStore(page, buffer);
         
