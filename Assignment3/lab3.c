@@ -96,7 +96,7 @@ void calc_phys(int i, int logical_address, char *physicalMemory){
             // Read the signed byte value from the translated physical address
             signed char value = physicalMemory[hit_phys_address];
 
-            printf("Virtual Address: %d, page Number: %d, Physical address: %d, Value: %d\n", logical_address, page, hit_phys_address, value);
+            printf("Virtual Address: %d, Physical address: %d, Value: %d\n", logical_address, hit_phys_address, value);
             return;
         }
     }
@@ -115,7 +115,7 @@ void calc_phys(int i, int logical_address, char *physicalMemory){
         tlb[tlb_index].frame_number = page_table[page].frame_number;
         tlb_index = (tlb_index + 1) % TLB_SIZE; // Implement FIFO replacement strategy
 
-        printf("Virtual Address: %d, pagenumber: %d, Physical address: %d, Value: %d\n", logical_address, page, miss_physical_address, value);
+        printf("Virtual Address: %d, Physical address: %d, Value: %d\n", logical_address, miss_physical_address, value);
         return;
     } else {
         // Page fault handling 
@@ -146,7 +146,7 @@ void calc_phys(int i, int logical_address, char *physicalMemory){
         tlb[tlb_index].frame_number = page_table[page].frame_number;
         tlb_index = (tlb_index + 1) % TLB_SIZE;
 
-        printf("Virtual Address: %d, Page Number: %d, Physical Address: %d, Value: %d\n", logical_address, page, fault_phys_address, value);
+        printf("Virtual Address: %d, Physical Address: %d, Value: %d\n", logical_address, fault_phys_address, value);
         return;
     }
 }
