@@ -1,0 +1,10 @@
+The inode values of file1.txt and file2.txt are the same an both have the inode value of 3858309. They also have the same content.
+After changing the contents of file2.txt the contents of file1.txt was also changed and was the same as file2.txt.
+After removing file1.txt file2.txt still exists and was not removed. 
+
+//osäker på denna snälla roy prova på din dator
+When removing file2.txt with strace the system call that is used is unlink().
+
+After linking together file3.txt and file4.txt they had different and unique inode values. File3.txt had 3860041 and file4.txt had 3860104. 
+When the contents of file4.txt were altered the contents of file3.txt were also altered and was the same as file4.txt. 
+After deleting file3.txt, when editing file4.txt file3.txt reappeared and wasn't removed anymore. 
