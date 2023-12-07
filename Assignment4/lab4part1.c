@@ -128,6 +128,79 @@ int scan(int requests[], int initalPosition){
     return totalHeadMovement;   
 }
 
+// Function to perform selection sort on an array
+int* selectionSort(const int requests[], int size) {
+    // Create a new array to store the sorted elements
+    int* sortedArr = (int*)malloc(size * sizeof(int));
+   
+
+    // Copy the original array to the new array
+    for (int i = 0; i < size; i++) {
+        sortedArr[i] = requests[i];
+    }
+
+    // Perform selection sort
+    for (int i = 0; i < size - 1; i++) {
+        // Find the minimum element in the unsorted part of the array
+        int minIndex = i;
+        for (int j = i + 1; j < size; j++) {
+            if (sortedArr[j] < sortedArr[minIndex]) {
+                minIndex = j;
+            }
+        }
+
+        // Swap the found minimum element with the first element
+        int temp = sortedArr[i];
+        sortedArr[i] = sortedArr[minIndex];
+        sortedArr[minIndex] = temp;
+    }
+
+    // Return the sorted array
+    return sortedArr;
+}
+
+//cScan FUNKAR!! (trorjag iaf)
+int cScan(int requests[], int initialPosition){
+    int headPosition = initialPosition;
+    int totalHeadMovement = 0;
+
+    int* sortedRequests = selectionSort(requests, REQUESTS);
+
+    int index = -1;
+
+    //Find starting index
+    for(int i = 0; i < REQUESTS; i++){
+        if(sortedRequests[i] > initialPosition){
+            index = i;
+            break;
+        }
+    }
+    //printf("index:%d\n", index);
+
+    for(int i = index; i < REQUESTS; i++){
+        if(headPosition < sortedRequests[i]){
+            totalHeadMovement += abs(headPosition - sortedRequests[i]);
+            //printf("index %d, value:%d, addedValue:%d\n", i, sortedRequests[i], abs(headPosition-sortedRequests[i]));
+            headPosition = sortedRequests[i];
+            
+        }
+    }
+    //printf("current Head positiond%d\n", headPosition);
+    totalHeadMovement += abs(CYLINDERS-1-headPosition);
+   // printf("addedValue:%d\n", abs(headPosition-199));
+    totalHeadMovement += abs(CYLINDERS - 1 - 0);
+    //printf("addedValue:%d\n", abs(headPosition-0));
+    headPosition = 0;
+    for(int i = 0; i < index; i++){
+        totalHeadMovement += abs(headPosition - sortedRequests[i]);
+        //printf("index %d, value:%d, addedValue:%d\n", i, sortedRequests[i], abs(headPosition-sortedRequests[i]));
+        headPosition = sortedRequests[i];
+    }
+
+    free(sortedRequests);
+    return totalHeadMovement;
+}
+
 
 // Function to generate an array of random cylinder requests
 
@@ -142,9 +215,9 @@ int main(int argc, char *argv[]) {
 
     int requests[] = {98, 183, 37, 122, 14, 124, 65, 67};
 
-    int scanCount = scan(requests, initialPosition);
+    int cscanCount = cScan(requests, initialPosition);
 
-    printf("scan total head movements: %d\n", scanCount);
+    printf("scan total head movements: %d\n", cscanCount);
 
 
     return 0;
