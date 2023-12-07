@@ -10,7 +10,7 @@ int fcfs(int requests[], int initalPosition) {
     int currentHeadPosition = initalPosition;
     int totalHeadMovement = 0;
 
-    for(int i = 0; i < REQUESTS; i++) {
+    for(int i = 0; i < 8; i++) {
        
         totalHeadMovement += abs(currentHeadPosition - requests[i]);
 
@@ -24,17 +24,17 @@ int sstf(int requests[], int initalPosition){
     int currentHeadPosition = initalPosition;
     int totalHeadMovement = 0;
 
-    bool check[1000];
+    bool check[8];
 
-    for(int i = 0; i < 1000; i++){
+    for(int i = 0; i < 8; i++){
         check[i] = false;
     }
 
-    for(int i = 0; i < REQUESTS; i++){
+    for(int i = 0; i < 8; i++){
         int minDistance = __INT_MAX__;
         int nextValue = -1;
 
-        for(int j = 0; j < REQUESTS; j++){
+        for(int j = 0; j < 8; j++){
            if(!check[j]) {
                 int distance = abs(currentHeadPosition - requests[j]);
                 if(distance < minDistance){
@@ -44,7 +44,7 @@ int sstf(int requests[], int initalPosition){
             } 
         }
 
-        printf("next value: %d, mindistance: %d\n", nextValue, minDistance);
+        //printf("next value: %d, mindistance: %d\n", nextValue, minDistance);
         check[nextValue] = true;
         totalHeadMovement += minDistance;
         currentHeadPosition = requests[nextValue]; 
@@ -57,9 +57,9 @@ int scan(int requests[], int initalPosition){
     int currentHeadPosition = initalPosition;
     int totalHeadMovement = 0;
 
-     bool check[1000];
+     bool check[8];
 
-    for(int i = 0; i < 1000; i++){
+    for(int i = 0; i < 8; i++){
         check[i] = false;
     }
 
@@ -94,7 +94,7 @@ int scan(int requests[], int initalPosition){
             } 
         }
         if(minDistance == __INT_MAX__){
-            printf("moving direction\n");
+           // printf("moving direction\n");
             totalHeadMovement += currentHeadPosition;
             currentHeadPosition = 0;
             movementDirection = 1;
@@ -112,13 +112,13 @@ int scan(int requests[], int initalPosition){
                 }
                 
             }
-            printf("next value: %d, mindistance: %d, value:%d\n", nextValue, minDistance, requests[nextValue]);
+           // printf("next value: %d, mindistance: %d, value:%d\n", nextValue, minDistance, requests[nextValue]);
             check[nextValue] = true;
             totalHeadMovement += minDistance;
             currentHeadPosition = requests[nextValue];
 
         } else {
-            printf("next value: %d, mindistance: %d, value:%d\n", nextValue, minDistance, requests[nextValue]);
+           // printf("next value: %d, mindistance: %d, value:%d\n", nextValue, minDistance, requests[nextValue]);
             check[nextValue] = true;
             totalHeadMovement += minDistance;
             currentHeadPosition = requests[nextValue];
@@ -164,12 +164,12 @@ int cScan(int requests[], int initialPosition){
     int headPosition = initialPosition;
     int totalHeadMovement = 0;
 
-    int* sortedRequests = selectionSort(requests, REQUESTS);
+    int* sortedRequests = selectionSort(requests, 8);
 
     int index = -1;
 
     //Find starting index
-    for(int i = 0; i < REQUESTS; i++){
+    for(int i = 0; i < 8; i++){
         if(sortedRequests[i] > initialPosition){
             index = i;
             break;
@@ -177,7 +177,7 @@ int cScan(int requests[], int initialPosition){
     }
     //printf("index:%d\n", index);
 
-    for(int i = index; i < REQUESTS; i++){
+    for(int i = index; i < 8; i++){
         if(headPosition < sortedRequests[i]){
             totalHeadMovement += abs(headPosition - sortedRequests[i]);
             //printf("index %d, value:%d, addedValue:%d\n", i, sortedRequests[i], abs(headPosition-sortedRequests[i]));
@@ -186,9 +186,9 @@ int cScan(int requests[], int initialPosition){
         }
     }
     //printf("current Head positiond%d\n", headPosition);
-    totalHeadMovement += abs(CYLINDERS-1-headPosition);
+    totalHeadMovement += abs(199-1-headPosition);
    // printf("addedValue:%d\n", abs(headPosition-199));
-    totalHeadMovement += abs(CYLINDERS - 1 - 0);
+    totalHeadMovement += abs(199 - 1 - 0);
     //printf("addedValue:%d\n", abs(headPosition-0));
     headPosition = 0;
     for(int i = 0; i < index; i++){
@@ -200,6 +200,71 @@ int cScan(int requests[], int initialPosition){
     free(sortedRequests);
     return totalHeadMovement;
 }
+//LOOk algortihm
+int look(int requests[], int initialPosition){
+    int headPosition = initialPosition;
+    int totalHeadMovement = 0;
+
+   int* sortedRequests = selectionSort(requests, 8);
+
+    int index = -1;
+
+    //Find starting index
+    for(int i = 0; i < 8; i++){
+        if(sortedRequests[i] > initialPosition){
+            index = i;
+            break;
+        }
+    }
+
+    for(int i = index; i < 8; i++){
+        totalHeadMovement += abs(headPosition - sortedRequests[i]);
+        headPosition = sortedRequests[i];
+    }
+
+    for(int i = index - 1; i >= 8; i--){
+        totalHeadMovement += abs(headPosition - sortedRequests[i]);
+        headPosition = sortedRequests[i];
+    }
+
+    free(sortedRequests);
+    return totalHeadMovement;
+
+
+}
+
+int cLook(int requests[], int initialPosition){
+    int headPosition = initialPosition;
+    int totalHeadMovement = 0;
+
+   int* sortedRequests = selectionSort(requests, 8);
+
+    int index = -1;
+
+    //Find starting index
+    for(int i = 0; i < 8; i++){
+        if(sortedRequests[i] > initialPosition){
+            index = i;
+            break;
+        }
+    }
+
+    for(int i = index; i < 8; i++){
+        totalHeadMovement += abs(headPosition - sortedRequests[i]);
+        headPosition = sortedRequests[i];
+    }
+
+    for(int i = 0; i < index; i++){
+        totalHeadMovement += abs(headPosition - sortedRequests[i]);
+        headPosition = sortedRequests[i];
+    }
+
+    free(sortedRequests);
+    return totalHeadMovement;
+
+
+}
+
 
 
 // Function to generate an array of random cylinder requests
@@ -215,9 +280,20 @@ int main(int argc, char *argv[]) {
 
     int requests[] = {98, 183, 37, 122, 14, 124, 65, 67};
 
-    int cscanCount = cScan(requests, initialPosition);
 
-    printf("scan total head movements: %d\n", cscanCount);
+    int fcfsCount = fcfs(requests, initialPosition);
+    int sstfCount = sstf(requests, initialPosition);
+    int scanCount = scan(requests, initialPosition);
+    int cscanCount = cScan(requests, initialPosition);
+    int lookCount = look(requests, initialPosition);
+    int clookCount = cLook(requests, initialPosition);
+
+    printf("FCFS total head movements: %d\n", fcfsCount);
+    printf("SSTF total head movements: %d\n", sstfCount);
+    printf("SCAN total head movements: %d\n", scanCount);
+    printf("CSCAN total head movements: %d\n", cscanCount);
+    printf("Look total head movements: %d\n", lookCount);
+    printf("CLOOK total head movements: %d\n", clookCount);
 
 
     return 0;
