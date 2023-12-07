@@ -5,6 +5,39 @@
 #define CYLINDERS 5000
 #define REQUESTS 1000
 
+
+// Function to perform selection sort on an array
+int* selectionSort(const int requests[], int size) {
+    // Create a new array to store the sorted elements
+    int* sortedArr = (int*)malloc(size * sizeof(int));
+   
+
+    // Copy the original array to the new array
+    for (int i = 0; i < size; i++) {
+        sortedArr[i] = requests[i];
+    }
+
+    // Perform selection sort
+    for (int i = 0; i < size - 1; i++) {
+        // Find the minimum element in the unsorted part of the array
+        int minIndex = i;
+        for (int j = i + 1; j < size; j++) {
+            if (sortedArr[j] < sortedArr[minIndex]) {
+                minIndex = j;
+            }
+        }
+
+        // Swap the found minimum element with the first element
+        int temp = sortedArr[i];
+        sortedArr[i] = sortedArr[minIndex];
+        sortedArr[minIndex] = temp;
+    }
+
+    // Return the sorted array
+    return sortedArr;
+}
+
+
 // FCFS algoritm FUNKAR!
 int fcfs(int requests[], int initalPosition) {
     int currentHeadPosition = initalPosition;
@@ -52,112 +85,40 @@ int sstf(int requests[], int initalPosition){
     return totalHeadMovement;   
 }
 
-//Scan algoritm, Kanske funkar????? riktig spagetthi kod helt ärligt
-int scan(int requests[], int initalPosition){
-    int currentHeadPosition = initalPosition;
+//Scan funkar!!!
+int scan(int requests[], int initialPosition){
+    int currentHeadPosition = initialPosition;
     int totalHeadMovement = 0;
 
-     bool check[8];
+    int* sortedRequests = selectionSort(requests, 8);
 
+    int index = -1;
+
+    //Find starting index
     for(int i = 0; i < 8; i++){
-        check[i] = false;
+        if(sortedRequests[i] > initialPosition){
+            index = i;
+            break;
+        }
     }
 
-    // 0 = vänster, 1 = höger
-    int movementDirection = 0;
-
-    for(int i = 0; i < 8; i++) {
-        int minDistance = __INT_MAX__;
-        int nextValue = -1;
-
-        for(int j = 0; j < 8; j++){
-           if(!check[j]) {
-                if(movementDirection == 0){
-                    if(requests[j] < currentHeadPosition) {
-                        int distance = abs(currentHeadPosition - requests[j]);
-                        if(distance < minDistance){
-                            minDistance = distance;
-                            nextValue = j;
-                        }    
-                    }
-                    
-                }
-                if(movementDirection == 1){
-                    if(requests[j] > currentHeadPosition) {
-                        int distance = abs(currentHeadPosition - requests[j]);
-                        if(distance < minDistance){
-                            minDistance = distance;
-                            nextValue = j;
-                        }    
-                    }  
-                }
-            } 
-        }
-        if(minDistance == __INT_MAX__){
-           // printf("moving direction\n");
-            totalHeadMovement += currentHeadPosition;
-            currentHeadPosition = 0;
-            movementDirection = 1;
-            for(int k = 0; k < 8; k++) {
-                if(!check[k]){
-                    if(movementDirection == 1){
-                        if(requests[k] > currentHeadPosition) {
-                            int distance = abs(currentHeadPosition - requests[k]);
-                            if(distance < minDistance){
-                                minDistance = distance;
-                                nextValue = k;
-                            }    
-                        }  
-                    }    
-                }
-                
-            }
-           // printf("next value: %d, mindistance: %d, value:%d\n", nextValue, minDistance, requests[nextValue]);
-            check[nextValue] = true;
-            totalHeadMovement += minDistance;
-            currentHeadPosition = requests[nextValue];
-
-        } else {
-           // printf("next value: %d, mindistance: %d, value:%d\n", nextValue, minDistance, requests[nextValue]);
-            check[nextValue] = true;
-            totalHeadMovement += minDistance;
-            currentHeadPosition = requests[nextValue];
-        }
-         
+    for(int i = index - 1; i >= 0; i--){
+        totalHeadMovement += abs(currentHeadPosition - sortedRequests[i]);
+        currentHeadPosition = sortedRequests[i];
     }
-    return totalHeadMovement;   
+    totalHeadMovement += abs(currentHeadPosition - 0);
+    currentHeadPosition = 0;
+
+    for(int i = index; i < 8; i++){
+        totalHeadMovement += abs(currentHeadPosition - sortedRequests[i]);
+        currentHeadPosition = sortedRequests[i];
+    }
+
+    free(sortedRequests);
+    return totalHeadMovement;
 }
 
-// Function to perform selection sort on an array
-int* selectionSort(const int requests[], int size) {
-    // Create a new array to store the sorted elements
-    int* sortedArr = (int*)malloc(size * sizeof(int));
-   
 
-    // Copy the original array to the new array
-    for (int i = 0; i < size; i++) {
-        sortedArr[i] = requests[i];
-    }
-
-    // Perform selection sort
-    for (int i = 0; i < size - 1; i++) {
-        // Find the minimum element in the unsorted part of the array
-        int minIndex = i;
-        for (int j = i + 1; j < size; j++) {
-            if (sortedArr[j] < sortedArr[minIndex]) {
-                minIndex = j;
-            }
-        }
-
-        // Swap the found minimum element with the first element
-        int temp = sortedArr[i];
-        sortedArr[i] = sortedArr[minIndex];
-        sortedArr[minIndex] = temp;
-    }
-
-    // Return the sorted array
-    return sortedArr;
-}
 
 //cScan FUNKAR!! (trorjag iaf)
 int cScan(int requests[], int initialPosition){
