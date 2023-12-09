@@ -43,7 +43,7 @@ int fcfs(int requests[], int initalPosition) {
     int currentHeadPosition = initalPosition;
     int totalHeadMovement = 0;
 
-    for(int i = 0; i < 8; i++) {
+    for(int i = 0; i < REQUESTS; i++) {
        
         totalHeadMovement += abs(currentHeadPosition - requests[i]);
 
@@ -57,17 +57,17 @@ int sstf(int requests[], int initalPosition){
     int currentHeadPosition = initalPosition;
     int totalHeadMovement = 0;
 
-    bool check[8];
+    bool check[REQUESTS];
 
-    for(int i = 0; i < 8; i++){
+    for(int i = 0; i < REQUESTS; i++){
         check[i] = false;
     }
 
-    for(int i = 0; i < 8; i++){
+    for(int i = 0; i < REQUESTS; i++){
         int minDistance = __INT_MAX__;
         int nextValue = -1;
 
-        for(int j = 0; j < 8; j++){
+        for(int j = 0; j < REQUESTS; j++){
            if(!check[j]) {
                 int distance = abs(currentHeadPosition - requests[j]);
                 if(distance < minDistance){
@@ -90,12 +90,12 @@ int scan(int requests[], int initialPosition){
     int currentHeadPosition = initialPosition;
     int totalHeadMovement = 0;
 
-    int* sortedRequests = selectionSort(requests, 8);
+    int* sortedRequests = selectionSort(requests, REQUESTS);
 
     int index = -1;
 
     //Find starting index
-    for(int i = 0; i < 8; i++){
+    for(int i = 0; i < REQUESTS; i++){
         if(sortedRequests[i] > initialPosition){
             index = i;
             break;
@@ -109,7 +109,7 @@ int scan(int requests[], int initialPosition){
     totalHeadMovement += abs(currentHeadPosition - 0);
     currentHeadPosition = 0;
 
-    for(int i = index; i < 8; i++){
+    for(int i = index; i < REQUESTS; i++){
         totalHeadMovement += abs(currentHeadPosition - sortedRequests[i]);
         currentHeadPosition = sortedRequests[i];
     }
@@ -125,12 +125,12 @@ int cScan(int requests[], int initialPosition){
     int headPosition = initialPosition;
     int totalHeadMovement = 0;
 
-    int* sortedRequests = selectionSort(requests, 8);
+    int* sortedRequests = selectionSort(requests, REQUESTS);
 
     int index = -1;
 
     //Find starting index
-    for(int i = 0; i < 8; i++){
+    for(int i = 0; i < REQUESTS; i++){
         if(sortedRequests[i] > initialPosition){
             index = i;
             break;
@@ -138,7 +138,7 @@ int cScan(int requests[], int initialPosition){
     }
     //printf("index:%d\n", index);
 
-    for(int i = index; i < 8; i++){
+    for(int i = index; i < REQUESTS; i++){
         if(headPosition < sortedRequests[i]){
             totalHeadMovement += abs(headPosition - sortedRequests[i]);
             //printf("index %d, value:%d, addedValue:%d\n", i, sortedRequests[i], abs(headPosition-sortedRequests[i]));
@@ -147,9 +147,9 @@ int cScan(int requests[], int initialPosition){
         }
     }
     //printf("current Head positiond%d\n", headPosition);
-    totalHeadMovement += abs(199-1-headPosition);
+    totalHeadMovement += abs(CYLINDERS-1-headPosition);
    // printf("addedValue:%d\n", abs(headPosition-199));
-    totalHeadMovement += abs(199 - 1 - 0);
+    totalHeadMovement += abs(CYLINDERS - 1 - 0);
     //printf("addedValue:%d\n", abs(headPosition-0));
     headPosition = 0;
     for(int i = 0; i < index; i++){
@@ -166,24 +166,24 @@ int look(int requests[], int initialPosition){
     int headPosition = initialPosition;
     int totalHeadMovement = 0;
 
-   int* sortedRequests = selectionSort(requests, 8);
+   int* sortedRequests = selectionSort(requests, REQUESTS);
 
     int index = -1;
 
     //Find starting index
-    for(int i = 0; i < 8; i++){
+    for(int i = 0; i < REQUESTS; i++){
         if(sortedRequests[i] > initialPosition){
             index = i;
             break;
         }
     }
 
-    for(int i = index; i < 8; i++){
+    for(int i = index; i < REQUESTS; i++){
         totalHeadMovement += abs(headPosition - sortedRequests[i]);
         headPosition = sortedRequests[i];
     }
 
-    for(int i = index - 1; i >= 8; i--){
+    for(int i = index - 1; i >= REQUESTS; i--){
         totalHeadMovement += abs(headPosition - sortedRequests[i]);
         headPosition = sortedRequests[i];
     }
@@ -198,19 +198,19 @@ int cLook(int requests[], int initialPosition){
     int headPosition = initialPosition;
     int totalHeadMovement = 0;
 
-   int* sortedRequests = selectionSort(requests, 8);
+   int* sortedRequests = selectionSort(requests, REQUESTS);
 
     int index = -1;
 
     //Find starting index
-    for(int i = 0; i < 8; i++){
+    for(int i = 0; i < REQUESTS; i++){
         if(sortedRequests[i] > initialPosition){
             index = i;
             break;
         }
     }
 
-    for(int i = index; i < 8; i++){
+    for(int i = index; i < REQUESTS; i++){
         totalHeadMovement += abs(headPosition - sortedRequests[i]);
         headPosition = sortedRequests[i];
     }
