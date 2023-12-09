@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <time.h>
 
 #define CYLINDERS 5000
 #define REQUESTS 1000
@@ -226,6 +227,15 @@ int cLook(int requests[], int initialPosition){
 
 }
 
+int contains(int array[], int size, int value) {
+    for (int i = 0; i < size; ++i) {
+        if (array[i] == value) {
+            return 1; // Value found
+        }
+    }
+    return 0; // Value not found
+}
+
 
 
 // Function to generate an array of random cylinder requests
@@ -239,7 +249,19 @@ int main(int argc, char *argv[]) {
 
     int initialPosition = atoi(argv[1]);
 
-    int requests[] = {98, 183, 37, 122, 14, 124, 65, 67};
+    int requests[REQUESTS];
+
+    srand(time(NULL)); 
+
+    for (int i = 0; i < REQUESTS; ++i) {
+        int random_request;
+        do {
+            random_request = rand() % CYLINDERS;
+        } while (contains(requests, i, random_request));
+
+        requests[i] = random_request;
+    }
+
 
 
     int fcfsCount = fcfs(requests, initialPosition);
